@@ -1,31 +1,38 @@
 using UnityEngine;
 using System;
-using System.Collections;
 
-// Spawns enemy waves from a pool. Assigns movement strategy based on wave number
-// to demonstrate runtime Strategy swapping without modifying EnemyController.
+// Drives waves with Update + timer instead of a coroutine.
+// Strategy is reassigned per wave so EnemyController stays unchanged.
 public class WaveManager : MonoBehaviour
 {
     [SerializeField] private int   totalWaves       = 3;
     [SerializeField] private int   baseEnemyCount   = 5;
     [SerializeField] private float betweenWaveDelay = 4f;
+    [SerializeField] private float startDelay       = 2f;
     [SerializeField] private float spawnRadius      = 8f;
+
+    private enum Phase { WaitingToStart, WaveActive, BetweenWaves, Finished }
 
     private ObjectPool enemyPool;
     private Transform  coreTransform;
+    private Phase      phase = Phase.WaitingToStart;
     private int        currentWave;
     private int        enemiesAlive;
+    private float      timer;
+    private bool       initialized;
 
-    // --- Observer events ---
     public static event Action<int> OnWaveStarted;
     public static event Action       OnAllWavesCleared;
 
     public void Init(ObjectPool pool, Transform core)
     {
+        Debug.Log("[WaveManager] Init called");
         enemyPool     = pool;
         coreTransform = core;
         EnemyController.OnEnemyDied += HandleEnemyDied;
-        StartCoroutine(RunWaves());
+        timer       = startDelay;
+        phase       = Phase.WaitingToStart;
+        initialized = true;
     }
 
     private void OnDestroy()
@@ -33,31 +40,51 @@ public class WaveManager : MonoBehaviour
         EnemyController.OnEnemyDied -= HandleEnemyDied;
     }
 
-    private IEnumerator RunWaves()
+    private void Update()
     {
-        yield return new WaitForSeconds(2f);
+        if (!initialized) return;
 
-        for (int w = 1; w <= totalWaves; w++)
+        switch (phase)
         {
-            currentWave  = w;
-            enemiesAlive = baseEnemyCount + (w - 1) * 2;
+            case Phase.WaitingToStart:
+                timer -= Time.deltaTime;
+                if (timer <= 0f) StartNextWave();
+                break;
 
-            OnWaveStarted?.Invoke(currentWave);
-            SpawnWave(enemiesAlive);
+            case Phase.WaveActive:
+                if (enemiesAlive <= 0)
+                {
+                    if (currentWave >= totalWaves)
+                    {
+                        Debug.Log("[WaveManager] All waves cleared");
+                        phase = Phase.Finished;
+                        OnAllWavesCleared?.Invoke();
+                    }
+                    else
+                    {
+                        phase = Phase.BetweenWaves;
+                        timer = betweenWaveDelay;
+                    }
+                }
+                break;
 
-            yield return new WaitUntil(() => enemiesAlive <= 0);
-
-            if (w < totalWaves)
-                yield return new WaitForSeconds(betweenWaveDelay);
+            case Phase.BetweenWaves:
+                timer -= Time.deltaTime;
+                if (timer <= 0f) StartNextWave();
+                break;
         }
-
-        OnAllWavesCleared?.Invoke();
     }
 
-    private void SpawnWave(int count)
+    private void StartNextWave()
     {
-        for (int i = 0; i < count; i++)
-            SpawnEnemy();
+        currentWave++;
+        enemiesAlive = baseEnemyCount + (currentWave - 1) * 2;
+        Debug.Log($"[WaveManager] Starting wave {currentWave} with {enemiesAlive} enemies");
+        OnWaveStarted?.Invoke(currentWave);
+
+        for (int i = 0; i < enemiesAlive; i++) SpawnEnemy();
+
+        phase = Phase.WaveActive;
     }
 
     private void SpawnEnemy()
@@ -73,6 +100,7 @@ public class WaveManager : MonoBehaviour
             : new DirectMoveStrategy();
 
         obj.GetComponent<EnemyController>()?.Init(strategy, coreTransform, enemyPool);
+        Debug.Log($"[WaveManager] Spawned enemy at {spawnPos}");
     }
 
     private void HandleEnemyDied(EnemyController _)

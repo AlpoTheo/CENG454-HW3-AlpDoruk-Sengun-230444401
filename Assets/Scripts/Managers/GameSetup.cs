@@ -14,12 +14,22 @@ public class GameSetup : MonoBehaviour
 
     private void Start()
     {
-        // Decorator chain: Base → RapidFire (x2 speed) → DoubleShot
-        IWeapon base_weapon    = new BaseWeapon(projectilePool, firePoint, 2f);
-        IWeapon rapidWeapon    = new RapidFireDecorator(base_weapon, 2f);
-        IWeapon doubleShotWeapon = new DoubleShotDecorator(rapidWeapon);
+        Debug.Log("[GameSetup] Start invoked");
 
-        playerShooter.SetWeapon(doubleShotWeapon);
+        if (projectilePool == null) { Debug.LogError("[GameSetup] projectilePool is NULL"); return; }
+        if (enemyPool      == null) { Debug.LogError("[GameSetup] enemyPool is NULL");      return; }
+        if (coreTransform  == null) { Debug.LogError("[GameSetup] coreTransform is NULL");  return; }
+        if (playerShooter  == null) { Debug.LogError("[GameSetup] playerShooter is NULL");  return; }
+        if (firePoint      == null) { Debug.LogError("[GameSetup] firePoint is NULL");      return; }
+        if (waveManager    == null) { Debug.LogError("[GameSetup] waveManager is NULL");    return; }
+
+        IWeapon basicWeapon    = new BaseWeapon(projectilePool, firePoint, 2f);
+        IWeapon rapidWeapon    = new RapidFireDecorator(basicWeapon, 2f);
+        IWeapon decoratedWeapon = new DoubleShotDecorator(rapidWeapon);
+
+        playerShooter.SetWeapon(decoratedWeapon);
         waveManager.Init(enemyPool, coreTransform);
+
+        Debug.Log("[GameSetup] Weapon set and WaveManager initialized");
     }
 }

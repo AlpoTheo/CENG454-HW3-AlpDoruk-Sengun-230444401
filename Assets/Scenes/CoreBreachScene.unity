@@ -738,6 +738,7 @@ MonoBehaviour:
   totalWaves: 3
   baseEnemyCount: 5
   betweenWaveDelay: 4
+  startDelay: 2
   spawnRadius: 9
 --- !u!4 &575294525
 Transform:
