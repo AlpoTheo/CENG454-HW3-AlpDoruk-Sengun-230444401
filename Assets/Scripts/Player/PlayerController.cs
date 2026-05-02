@@ -1,6 +1,6 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
-// Handles WASD movement and mouse-aimed rotation for the player.
 [RequireComponent(typeof(Rigidbody2D))]
 public class PlayerController : MonoBehaviour
 {
@@ -25,16 +25,25 @@ public class PlayerController : MonoBehaviour
 
     private void Move()
     {
-        float x = Input.GetAxisRaw("Horizontal");
-        float y = Input.GetAxisRaw("Vertical");
-        rb.linearVelocity = new Vector2(x, y).normalized * moveSpeed;
+        if (Keyboard.current == null) return;
+
+        Vector2 input = Vector2.zero;
+        if (Keyboard.current.wKey.isPressed || Keyboard.current.upArrowKey.isPressed)    input.y += 1f;
+        if (Keyboard.current.sKey.isPressed || Keyboard.current.downArrowKey.isPressed)  input.y -= 1f;
+        if (Keyboard.current.aKey.isPressed || Keyboard.current.leftArrowKey.isPressed)  input.x -= 1f;
+        if (Keyboard.current.dKey.isPressed || Keyboard.current.rightArrowKey.isPressed) input.x += 1f;
+
+        rb.linearVelocity = input.normalized * moveSpeed;
     }
 
     private void AimAtMouse()
     {
-        Vector3 mouseWorld = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        Vector2 dir        = (mouseWorld - transform.position).normalized;
-        float   angle      = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
-        transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
+        if (Mouse.current == null || Camera.main == null) return;
+
+        Vector2 mouseScreen = Mouse.current.position.ReadValue();
+        Vector3 mouseWorld  = Camera.main.ScreenToWorldPoint(new Vector3(mouseScreen.x, mouseScreen.y, 10f));
+        Vector2 dir         = ((Vector2)mouseWorld - (Vector2)transform.position).normalized;
+        float   angle       = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+        transform.rotation  = Quaternion.AngleAxis(angle, Vector3.forward);
     }
 }

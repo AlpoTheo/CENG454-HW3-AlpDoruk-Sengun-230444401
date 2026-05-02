@@ -9,7 +9,7 @@ public class WaveManager : MonoBehaviour
     [SerializeField] private int   totalWaves       = 3;
     [SerializeField] private int   baseEnemyCount   = 5;
     [SerializeField] private float betweenWaveDelay = 4f;
-    [SerializeField] private float spawnRadius      = 9f;
+    [SerializeField] private float spawnRadius      = 8f;
 
     private ObjectPool enemyPool;
     private Transform  coreTransform;
@@ -35,7 +35,7 @@ public class WaveManager : MonoBehaviour
 
     private IEnumerator RunWaves()
     {
-        yield return new WaitForSeconds(1.5f);
+        yield return new WaitForSeconds(2f);
 
         for (int w = 1; w <= totalWaves; w++)
         {
@@ -62,12 +62,12 @@ public class WaveManager : MonoBehaviour
 
     private void SpawnEnemy()
     {
-        Vector2 spawnPos = UnityEngine.Random.insideUnitCircle.normalized * spawnRadius;
+        float   angle    = UnityEngine.Random.Range(0f, 360f) * Mathf.Deg2Rad;
+        Vector2 spawnPos = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * spawnRadius;
 
         GameObject obj = enemyPool.Get();
         obj.transform.position = spawnPos;
 
-        // Strategy switches per wave — no change needed inside EnemyController.
         IMovementStrategy strategy = currentWave >= 2
             ? (IMovementStrategy)new ZigZagMoveStrategy()
             : new DirectMoveStrategy();

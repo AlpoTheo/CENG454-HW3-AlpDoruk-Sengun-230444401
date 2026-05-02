@@ -1,7 +1,6 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
-// Owns an IWeapon reference (set at runtime by GameSetup).
-// Depends only on the IWeapon interface — never on BaseWeapon or any decorator.
 public class PlayerShooter : MonoBehaviour
 {
     private IWeapon weapon;
@@ -15,15 +14,16 @@ public class PlayerShooter : MonoBehaviour
 
     private void Update()
     {
-        if (weapon == null) return;
+        if (weapon == null || Mouse.current == null || Camera.main == null) return;
 
         fireTimer += Time.deltaTime;
 
-        if (Input.GetMouseButton(0) && fireTimer >= 1f / weapon.FireRate)
+        if (Mouse.current.leftButton.isPressed && fireTimer >= 1f / weapon.FireRate)
         {
             fireTimer = 0f;
-            Vector3 mouseWorld = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            Vector2 direction  = (mouseWorld - transform.position).normalized;
+            Vector2 mouseScreen = Mouse.current.position.ReadValue();
+            Vector3 mouseWorld  = Camera.main.ScreenToWorldPoint(new Vector3(mouseScreen.x, mouseScreen.y, 10f));
+            Vector2 direction   = ((Vector2)mouseWorld - (Vector2)transform.position).normalized;
             weapon.Fire(direction);
         }
     }
