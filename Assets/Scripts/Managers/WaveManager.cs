@@ -92,9 +92,7 @@ public class WaveManager : MonoBehaviour
         GameObject obj = enemyPool.Get();
         obj.transform.position = spawnPos;
 
-        IMovementStrategy strategy = currentWave >= 2
-            ? (IMovementStrategy)new ZigZagMoveStrategy()
-            : new DirectMoveStrategy();
+        IMovementStrategy strategy = SelectStrategyForWave(currentWave);
 
         obj.GetComponent<EnemyController>()?.Init(strategy, coreTransform, enemyPool);
     }
@@ -102,5 +100,15 @@ public class WaveManager : MonoBehaviour
     private void HandleEnemyDied(EnemyController _)
     {
         enemiesAlive = Mathf.Max(0, enemiesAlive - 1);
+    }
+
+    private static IMovementStrategy SelectStrategyForWave(int wave)
+    {
+        switch (wave)
+        {
+            case 1:  return new DirectMoveStrategy();
+            case 2:  return new ZigZagMoveStrategy();
+            default: return new OrbitMoveStrategy();
+        }
     }
 }
