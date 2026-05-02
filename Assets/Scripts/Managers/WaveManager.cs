@@ -1,8 +1,8 @@
 using UnityEngine;
 using System;
 
-// Drives waves with Update + timer instead of a coroutine.
-// Strategy is reassigned per wave so EnemyController stays unchanged.
+// Drives waves with an Update timer. Strategy is reassigned per wave so
+// EnemyController stays unchanged when a new movement pattern is introduced.
 public class WaveManager : MonoBehaviour
 {
     [SerializeField] private int   totalWaves       = 3;
@@ -26,7 +26,6 @@ public class WaveManager : MonoBehaviour
 
     public void Init(ObjectPool pool, Transform core)
     {
-        Debug.Log("[WaveManager] Init called");
         enemyPool     = pool;
         coreTransform = core;
         EnemyController.OnEnemyDied += HandleEnemyDied;
@@ -56,7 +55,6 @@ public class WaveManager : MonoBehaviour
                 {
                     if (currentWave >= totalWaves)
                     {
-                        Debug.Log("[WaveManager] All waves cleared");
                         phase = Phase.Finished;
                         OnAllWavesCleared?.Invoke();
                     }
@@ -79,7 +77,6 @@ public class WaveManager : MonoBehaviour
     {
         currentWave++;
         enemiesAlive = baseEnemyCount + (currentWave - 1) * 2;
-        Debug.Log($"[WaveManager] Starting wave {currentWave} with {enemiesAlive} enemies");
         OnWaveStarted?.Invoke(currentWave);
 
         for (int i = 0; i < enemiesAlive; i++) SpawnEnemy();
@@ -100,7 +97,6 @@ public class WaveManager : MonoBehaviour
             : new DirectMoveStrategy();
 
         obj.GetComponent<EnemyController>()?.Init(strategy, coreTransform, enemyPool);
-        Debug.Log($"[WaveManager] Spawned enemy at {spawnPos}");
     }
 
     private void HandleEnemyDied(EnemyController _)
