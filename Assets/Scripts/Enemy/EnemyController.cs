@@ -2,7 +2,7 @@ using UnityEngine;
 using System;
 
 // Enemy that implements IDamageable and IPoolable.
-// Movement is fully delegated to IMovementStrategy — swappable per wave.
+// Movement is fully delegated to IMovementStrategy. Swappable per wave.
 // Fires OnEnemyDied so WaveManager can count kills without tight coupling.
 public class EnemyController : MonoBehaviour, IDamageable, IPoolable
 {

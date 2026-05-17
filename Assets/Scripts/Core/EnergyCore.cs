@@ -3,7 +3,7 @@ using System;
 
 // Observer pattern: EnergyCore fires static C# events.
 // Any system (HUD, GameManager, AudioManager) can subscribe without
-// EnergyCore knowing who listens — loose coupling by design.
+// EnergyCore knowing who listens. Loose coupling by design.
 public class EnergyCore : MonoBehaviour, IDamageable
 {
     [SerializeField] private float maxHealth = 100f;
