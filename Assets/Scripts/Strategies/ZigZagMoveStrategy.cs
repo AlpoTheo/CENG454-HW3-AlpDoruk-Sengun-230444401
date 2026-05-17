@@ -1,7 +1,7 @@
 using UnityEngine;
 
 // Strategy 2: Enemy weaves side-to-side while approaching the core.
-// Used in Wave 2+ — harder for the player to hit.
+// Used in Wave 2+. Harder for the player to hit.
 // Swappable into EnemyController without changing EnemyController's code.
 public class ZigZagMoveStrategy : IMovementStrategy
 {

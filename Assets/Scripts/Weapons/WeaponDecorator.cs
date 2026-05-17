@@ -1,8 +1,8 @@
 using UnityEngine;
 
 // Abstract base for all weapon decorators.
-// Wraps any IWeapon and forwards calls to it by default —
-// concrete decorators only override what they change.
+// Wraps any IWeapon and forwards calls to it by default.
+// Concrete decorators only override what they change.
 public abstract class WeaponDecorator : IWeapon
 {
     protected readonly IWeapon inner;

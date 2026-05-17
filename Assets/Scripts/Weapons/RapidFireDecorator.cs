@@ -1,5 +1,5 @@
 // Decorator: multiplies the inner weapon's fire rate.
-// Does not modify Fire() — only changes how often PlayerShooter calls it.
+// Does not modify Fire(). Only changes how often PlayerShooter calls it.
 public class RapidFireDecorator : WeaponDecorator
 {
     private readonly float multiplier;
